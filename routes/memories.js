@@ -268,6 +268,8 @@ async function getMemory(req, res, next) {
 
 // Pagination
 
+const hasStartAndLimit = (start, limit) => !isNaN(start) && !isNaN(limit);
+
 function getTotalPages(totalItems, start, limit) {
     let totalPages
 
@@ -294,6 +296,10 @@ function getCurrentPage(totalItems, start, limit) {
     return currentPage
 }
 
+function getFirstQueryString (totalItems, start, limit) {
+    hasStartAndLimit(start, limit) ? `?start=1&limit=${limit}` : "";
+}
+
 function getLastPageItem(totalItems, start, limit) {
     let lastPageItem = (totalItems- (start - 1)) % limit;
 
@@ -301,10 +307,9 @@ function getLastPageItem(totalItems, start, limit) {
 }
 
 function getLastPageItemQuery(totalItems, start, limit) {
-    let lastPageItem = getLastPageItem(totalItems, start, limit)
-    let lastPageItemQuery = "?start=" + lastPageItem + "&limit=" + limit
-
-    return lastPageItemQuery
+    hasStartAndLimit(start, limit)
+    ? `?start=${lastPageItem(total, start, limit)}&limit=${limit}`
+    : "";
 }
 
 function getPreviousPageItem(totalItems, start, limit) {
@@ -314,10 +319,9 @@ function getPreviousPageItem(totalItems, start, limit) {
 }
 
 function getPreviousPageItemQuery(totalItems, start, limit) {
-    let previousPageItem = getPreviousPageItem(totalItems, start, limit)
-    let previousPageItemQuery = "?start=" + previousPageItem + "&limit=" + limit
-
-    return previousPageItemQuery
+    hasStartAndLimit(start, limit)
+    ? `?start=${previousPageItem(total, start, limit)}&limit=${limit}`
+    : "";
 }
 
 
@@ -329,10 +333,9 @@ function getNextPageItem(totalItems, start, limit) {
 
 
 function getNextPageItemQuery(totalItems, start, limit) {
-    let nextPageItem = getNextPageItem(totalItems, start, limit)
-    let nextPageItemQuery = "?start=" + nextPageItem + "&limit=" + limit
-
-    return nextPageItemQuery
+    hasStartAndLimit(start, limit)
+    ? `?start=${nextPageItem(total, start, limit)}&limit=${limit}`
+    : "";
 }
 
 
