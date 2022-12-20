@@ -265,7 +265,9 @@ const getFirstQueryString = (total, start, limit) =>
   hasStartAndLimit(start, limit) ? `?start=1&limit=${limit}` : "";
 
 function getLastPageItem(totalItems, start, limit) {
-    let lastPageItem = (totalItems- (start - 1)) % limit;
+    let lastPageItem = (Math.ceil(totalItems / limit) - 1) * limit + 1;
+    // (totalItems - (start - 1)) % limit;
+    
 
     return lastPageItem
 }
@@ -301,7 +303,7 @@ const getNextQueryString = (totalItems, start, limit) =>
 
 
 function getPageNumber(totalItems, start, limit, itemNumber) {
-    let pageNumber = Math.ceil(itemNumber / limit)
+    let pageNumber = Math.ceil(totalItems/ limit)
 
     console.log("pageNumber: " + pageNumber)
     return pageNumber
@@ -317,6 +319,9 @@ function generatePagination(totalItems, start, limit, req, res) {
     console.log("nextPageItem: " + nextPageItem)
 
     try {
+        const pages = getPageNumber(totalItems, start, limit);
+        const page = getCurrentPage(totalItems, start, limit);
+
         let pagination = {
             "currentPage": getCurrentPage(totalItems, start, limit),
             "currentItems": limit,
@@ -340,7 +345,7 @@ function generatePagination(totalItems, start, limit, req, res) {
                       )}`,
                 },
                 "previous": {
-                    "page": getPageNumber(totalItems, start, limit),
+                    "page": page - 1 <= 1 ? 1 : page - 1,
                     "href": `${process.env.BASE_URI}${getPreviousQueryString(
                         totalItems,
                         start,
@@ -348,7 +353,7 @@ function generatePagination(totalItems, start, limit, req, res) {
                       )}`,
                 },
                 "next": {
-                    "page": getPageNumber(totalItems, start, limit),
+                    "page": page + 1 > pages ? page : page + 1,
                     "href": `${process.env.BASE_URI}${getNextQueryString(
                         totalItems,
                         start,
