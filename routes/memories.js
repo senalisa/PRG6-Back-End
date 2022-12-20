@@ -8,6 +8,15 @@ const memory = require('../models/memories')
 const Memory = require('../models/memories')
 const memoryModel = require("../models/memories.js");
 
+router.use('/', (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "*");
+    res.header("Access-Control-Allow-Methods", "Origin, Content-Type, Accept");
+    res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
+
+    next()
+})
+
 //GET
 //Checkt HEADER Accept, het moet json zijn
 router.get("/", (req, res, next) => {
