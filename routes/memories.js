@@ -55,78 +55,50 @@ router.get('/', async (req,res) => {
                     href: `${process.env.BASE_URI}`
                 }
             },
-            pagination: "Will be added soon!"
+            pagination: generatePagination(totalItems, start, parseInt(limit), req, res)
         }
 
-        try {    
+        // try {    
 
-            if(start == 1) {
-                memoriesCollection = {
-                    ...memoriesCollection,
-                    "pagination": {
-                        "currentPage": 1,
-                        "currentItems": totalItems,
-                        "totalPages": 1,
-                        "totalItems": totalItems,
-                        "_links": {
-                            "first": {
-                                "page": 1,
-                                "href": "http://" + req.headers.host + "/"
-                            },
-                            "last": {
-                                "page": 1,
-                                "href": "http://" + req.headers.host + "/"
-                            },
-                            "previous": {
-                                "page": 1,
-                                "href": "http://" + req.headers.host + "/"
-                            },
-                            "next": {
-                                "page": 1,
-                                "href": "http://" + req.headers.host + "/"
-                            }
-                        }
-                    }
-                }
-            } if(req.query.limit == 1) { 
-                memoriesCollection = {
-                    ...memoriesCollection,
-                    "pagination": {
-                        "currentPage": 3,
-                        "currentItems": 1,
-                        "totalPages": 14,
-                        "totalItems": 14,
-                        "_links": {
-                            "first": {
-                                "page": 1,
-                                "href": "http://" + req.headers.host + "/" + "?start=" + 1 + "&limit=" + 1
-                            },
-                            "last": {
-                                "page": 14,
-                                "href": "http://" + req.headers.host + "/" + "?start=" + 14 + "&limit=" + 1
-                            },
-                            "previous": {
-                                "page": 2,
-                                "href": "http://" + req.headers.host + "/" + "?start=" + 2 + "&limit=" + 1
-                            },
-                            "next": {
-                                "page": 4,
-                                "href": "http://" + req.headers.host + "/" + "?start=" + 4 + "&limit=" + 1
-                            }
-                        }
-                    } 
-                }
-            } else {
-                memoriesCollection = {
-                    ...memoriesCollection,
-                    "pagination": generatePagination(totalItems, start, parseInt(limit), req, res)
-                }
-            }
+        //     if(start == 1) {
+        //         memoriesCollection = {
+        //             ...memoriesCollection,
+        //             "pagination": {
+        //                 "currentPage": 1,
+        //                 "currentItems": totalItems,
+        //                 "totalPages": 1,
+        //                 "totalItems": totalItems,
+        //                 "_links": {
+        //                     "first": {
+        //                         "page": 1,
+        //                         "href": "http://" + req.headers.host + "/"
+        //                     },
+        //                     "last": {
+        //                         "page": 1,
+        //                         "href": "http://" + req.headers.host + "/"
+        //                     },
+        //                     "previous": {
+        //                         "page": 1,
+        //                         "href": "http://" + req.headers.host + "/"
+        //                     },
+        //                     "next": {
+        //                         "page": 1,
+        //                         "href": "http://" + req.headers.host + "/"
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     } else {
+        //         memoriesCollection = {
+        //             ...memoriesCollection,
+        //             "pagination": generatePagination(totalItems, start, parseInt(limit), req, res)
+        //         }
+        //     }
 
 
-        } catch {
-            res.status(500).json({ message: "pagination can not be build; " + err.message })
-        }
+        // } catch {
+        //     res.status(500).json({ message: "pagination can not be build; " + err.message })
+        // }
 
         res.status(200).json(memoriesCollection)
 
@@ -248,6 +220,7 @@ router.options("/:id", (req, res) => {
     res.send();
 })
 
+//MIDDLEWARE
 //Function for a middleware to get the memory with id
 async function getMemory(req, res, next) {
 
@@ -266,8 +239,8 @@ async function getMemory(req, res, next) {
     next()
 }
 
-// Pagination
-
+//PAGINATION
+//Functions
 const hasStartAndLimit = (start, limit) => !isNaN(start) && !isNaN(limit);
 
 function getTotalPages(totalItems, start, limit) {
@@ -283,22 +256,13 @@ function getTotalPages(totalItems, start, limit) {
 }
 
 function getCurrentPage(totalItems, start, limit) {
-    // let currentPage
-
-    // if (start == null || limit == null) {
-    //     currentPage = 1
-    // }
-
-    // currentPage = Math.ceil(start / limit)
-
     const currentPage = Math.floor((start - 1) / limit) + 1;
 
     return currentPage
 }
 
-function getFirstQueryString (totalItems, start, limit) {
-    hasStartAndLimit(start, limit) ? `?start=1&limit=${limit}` : "";
-}
+const getFirstQueryString = (total, start, limit) =>
+  hasStartAndLimit(start, limit) ? `?start=1&limit=${limit}` : "";
 
 function getLastPageItem(totalItems, start, limit) {
     let lastPageItem = (totalItems- (start - 1)) % limit;
@@ -306,11 +270,10 @@ function getLastPageItem(totalItems, start, limit) {
     return lastPageItem
 }
 
-function getLastPageItemQuery(totalItems, start, limit) {
-    hasStartAndLimit(start, limit)
-    ? `?start=${lastPageItem(total, start, limit)}&limit=${limit}`
+const getLastQueryString = (totalItems, start, limit) =>
+  hasStartAndLimit(start, limit)
+    ? `?start=${getLastPageItem(totalItems, start, limit)}&limit=${limit}`
     : "";
-}
 
 function getPreviousPageItem(totalItems, start, limit) {
     let previousPageItem = start - limit 
@@ -318,11 +281,10 @@ function getPreviousPageItem(totalItems, start, limit) {
     return previousPageItem
 }
 
-function getPreviousPageItemQuery(totalItems, start, limit) {
-    hasStartAndLimit(start, limit)
-    ? `?start=${previousPageItem(total, start, limit)}&limit=${limit}`
+const getPreviousQueryString = (totalItems, start, limit) =>
+  hasStartAndLimit(start, limit)
+    ? `?start=${getPreviousPageItem(totalItems, start, limit)}&limit=${limit}`
     : "";
-}
 
 
 function getNextPageItem(totalItems, start, limit) {
@@ -332,11 +294,10 @@ function getNextPageItem(totalItems, start, limit) {
 }
 
 
-function getNextPageItemQuery(totalItems, start, limit) {
-    hasStartAndLimit(start, limit)
-    ? `?start=${nextPageItem(total, start, limit)}&limit=${limit}`
+const getNextQueryString = (totalItems, start, limit) =>
+  hasStartAndLimit(start, limit)
+    ? `?start=${getNextPageItem(totalItems, start, limit)}&limit=${limit}`
     : "";
-}
 
 
 function getPageNumber(totalItems, start, limit, itemNumber) {
@@ -364,19 +325,35 @@ function generatePagination(totalItems, start, limit, req, res) {
             "_links": {
                 "first": {
                     "page": 1,
-                    "href": "http://" + req.headers.host + "/" + "?start=" + 1 + "&limit=" + limit
+                    "href": `${process.env.BASE_URI}${getFirstQueryString(
+                        totalItems,
+                        start,
+                        limit
+                      )}`,
                 },
                 "last": {
-                    "page": getPageNumber(totalItems, start, limit, lastPageItem),
-                    "href": "http://" + req.headers.host + "/" + getLastPageItemQuery()
+                    "page": getPageNumber(totalItems, start, limit),
+                    "href": `${process.env.BASE_URI}${getLastQueryString(
+                        totalItems,
+                        start,
+                        limit
+                      )}`,
                 },
                 "previous": {
-                    "page": getPageNumber(totalItems, start, limit, previousPageItem),
-                    "href": "http://" + req.headers.host + "/" + getPreviousPageItemQuery()
+                    "page": getPageNumber(totalItems, start, limit),
+                    "href": `${process.env.BASE_URI}${getPreviousQueryString(
+                        totalItems,
+                        start,
+                        limit
+                      )}`,
                 },
                 "next": {
-                    "page": getPageNumber(totalItems, start, limit, nextPageItem),
-                    "href": "http://" + req.headers.host + "/" + getNextPageItemQuery()
+                    "page": getPageNumber(totalItems, start, limit),
+                    "href": `${process.env.BASE_URI}${getNextQueryString(
+                        totalItems,
+                        start,
+                        limit
+                      )}`,
                 }
             }
         }
