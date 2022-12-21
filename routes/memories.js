@@ -1,13 +1,11 @@
 const express = require('express');
-const memories = require('../models/memories');
-const cors = require('cors');
 
 const router = express.Router();
 
-const memory = require('../models/memories')
 const Memory = require('../models/memories')
 const memoryModel = require("../models/memories.js");
 
+//CORS
 router.use('/', (req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "*");
@@ -17,6 +15,8 @@ router.use('/', (req, res, next) => {
     next()
 })
 
+
+//ROUTES
 //GET
 //Checkt HEADER Accept, het moet json zijn
 router.get("/", (req, res, next) => {
@@ -58,48 +58,6 @@ router.get('/', async (req,res) => {
             pagination: generatePagination(totalItems, start, parseInt(limit), req, res)
         }
 
-        // try {    
-
-        //     if(start == 1) {
-        //         memoriesCollection = {
-        //             ...memoriesCollection,
-        //             "pagination": {
-        //                 "currentPage": 1,
-        //                 "currentItems": totalItems,
-        //                 "totalPages": 1,
-        //                 "totalItems": totalItems,
-        //                 "_links": {
-        //                     "first": {
-        //                         "page": 1,
-        //                         "href": "http://" + req.headers.host + "/"
-        //                     },
-        //                     "last": {
-        //                         "page": 1,
-        //                         "href": "http://" + req.headers.host + "/"
-        //                     },
-        //                     "previous": {
-        //                         "page": 1,
-        //                         "href": "http://" + req.headers.host + "/"
-        //                     },
-        //                     "next": {
-        //                         "page": 1,
-        //                         "href": "http://" + req.headers.host + "/"
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     } else {
-        //         memoriesCollection = {
-        //             ...memoriesCollection,
-        //             "pagination": generatePagination(totalItems, start, parseInt(limit), req, res)
-        //         }
-        //     }
-
-
-        // } catch {
-        //     res.status(500).json({ message: "pagination can not be build; " + err.message })
-        // }
-
         res.status(200).json(memoriesCollection)
 
         res.json(memoriesCollection)
@@ -108,6 +66,7 @@ router.get('/', async (req,res) => {
     }
     
 })
+
 
 //DETAIL
 //Checkt HEADER Accept, het moet json zijn
@@ -128,6 +87,7 @@ router.get('/:id', getMemory, (req,res) => {
     res.json(res.memory);
 })
 
+
 //CREATE
 //Middelware om lege velden te checken
 router.post("/", (req, res, next) => {
@@ -140,7 +100,7 @@ router.post("/", (req, res, next) => {
    }
 })
 
-// create Route
+//Create Route
 router.post('/', async (req,res) => {
     console.log("POST");
 
@@ -159,6 +119,7 @@ router.post('/', async (req,res) => {
         res.status(500).send();
     }
 })
+
 
 //UPDATE
 //Middelware om lege velden te checken
@@ -198,6 +159,7 @@ router.put('/:id', getMemory, async (req, res) => {
     }
 })
 
+
 //DELETE
 router.delete('/:id', getMemory, async (req, res) => {
     try {
@@ -207,6 +169,7 @@ router.delete('/:id', getMemory, async (req, res) => {
         res.status(500).json({ message: err.message })
     }
 })
+
 
 //OPTIONS
 router.options("/", (req, res) => {
@@ -219,6 +182,7 @@ router.options("/:id", (req, res) => {
     res.setHeader('Allow', 'GET, PUT, DELETE, OPTIONS');
     res.send();
 })
+
 
 //MIDDLEWARE
 //Function for a middleware to get the memory with id
@@ -239,6 +203,7 @@ async function getMemory(req, res, next) {
     next()
 }
 
+
 //PAGINATION
 //Functions
 const hasStartAndLimit = (start, limit) => !isNaN(start) && !isNaN(limit);
@@ -257,7 +222,6 @@ function getTotalPages(totalItems, start, limit) {
 
 function getCurrentPage(totalItems, start, limit) {
     const currentPage = Math.floor((start - 1) / limit) + 1;
-
     return currentPage
 }
 
@@ -266,9 +230,6 @@ const getFirstQueryString = (total, start, limit) =>
 
 function getLastPageItem(totalItems, start, limit) {
     let lastPageItem = (Math.ceil(totalItems / limit) - 1) * limit + 1;
-    // (totalItems - (start - 1)) % limit;
-    
-
     return lastPageItem
 }
 
@@ -279,7 +240,6 @@ const getLastQueryString = (totalItems, start, limit) =>
 
 function getPreviousPageItem(totalItems, start, limit) {
     let previousPageItem = start - limit 
-
     return previousPageItem
 }
 
@@ -291,36 +251,24 @@ const getPreviousQueryString = (totalItems, start, limit) =>
 
 function getNextPageItem(totalItems, start, limit) {
     let nextPageItem = start + limit 
-
     return nextPageItem
 }
-
 
 const getNextQueryString = (totalItems, start, limit) =>
   hasStartAndLimit(start, limit)
     ? `?start=${getNextPageItem(totalItems, start, limit)}&limit=${limit}`
     : "";
 
-
 function getPageNumber(totalItems, start, limit, itemNumber) {
-    let pageNumber = Math.ceil(totalItems/ limit)
-
-    console.log("pageNumber: " + pageNumber)
+    let pageNumber = Math.ceil(totalItems / limit)
     return pageNumber
 }
 
 function generatePagination(totalItems, start, limit, req, res) {
-    lastPageItem = getLastPageItem(totalItems, start, limit)
-    previousPageItem = getPreviousPageItem(totalItems, start, limit)
-    nextPageItem = getNextPageItem(totalItems, start, limit)
-
-    console.log("lastPageItem: " + lastPageItem)
-    console.log("previousPageItem: " + previousPageItem)
-    console.log("nextPageItem: " + nextPageItem)
 
     try {
-        const pages = getPageNumber(totalItems, start, limit);
-        const page = getCurrentPage(totalItems, start, limit);
+        const pagenumber = getPageNumber(totalItems, start, limit);
+        const currentpage = getCurrentPage(totalItems, start, limit);
 
         let pagination = {
             "currentPage": getCurrentPage(totalItems, start, limit),
@@ -345,7 +293,7 @@ function generatePagination(totalItems, start, limit, req, res) {
                       )}`,
                 },
                 "previous": {
-                    "page": page - 1 <= 1 ? 1 : page - 1,
+                    "page": currentpage - 1 <= 1 ? 1 : currentpage - 1,
                     "href": `${process.env.BASE_URI}${getPreviousQueryString(
                         totalItems,
                         start,
@@ -353,7 +301,7 @@ function generatePagination(totalItems, start, limit, req, res) {
                       )}`,
                 },
                 "next": {
-                    "page": page + 1 > pages ? page : page + 1,
+                    "page": currentpage + 1 > pagenumber ? currentpage : currentpage + 1,
                     "href": `${process.env.BASE_URI}${getNextQueryString(
                         totalItems,
                         start,
@@ -362,7 +310,6 @@ function generatePagination(totalItems, start, limit, req, res) {
                 }
             }
         }
-
         return pagination
     } catch (err) {
         return res.status(500).json({ message: err.message})

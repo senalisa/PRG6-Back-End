@@ -2,28 +2,24 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const cors = require('cors');
 
+//.env
 require('dotenv').config();
 
-// Import the mongoose module
+//MongoDB
 const mongoose = require("mongoose");
-
-// Set up default mongoose connection
 const mongoDB = "mongodb://127.0.0.1/memories";
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
-
-// Get the default connection
 const db = mongoose.connection;
-
-// Bind connection to error event (to get notification of connection errors)
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
-
-//create webserver
+//Create webserver
 const app = express();
 
+//bodyParser
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json({type:'application/json'}))
 
+//Route require
 const memoriesRoute = require("./routes/memories.js");
 
 app.use('/', memoriesRoute)
@@ -41,7 +37,7 @@ app.use(function (req, res, next) {
       next();
   });
 
-//start webserver on port 8000
+//Start webserver on port 8000
 app.listen(8000, () => {
     console.log("Webserver Started!")
 })

@@ -1,7 +1,7 @@
 // Require Mongoose
 const mongoose = require("mongoose");
 
-// Define a schema
+// Define schema
 const Schema = mongoose.Schema;
 
 const memorySchema = new Schema({
@@ -12,7 +12,7 @@ const memorySchema = new Schema({
   author: String
 }, {toJSON: {virtuals: true}});
 
-//Virtual property (to include dynamic links)
+//Virtual property to include dynamic links
 memorySchema.virtual('_links').get(
    function()  {
     return {
@@ -26,5 +26,5 @@ memorySchema.virtual('_links').get(
   }
 )
 
-// Export function to create "SomeModel" model class
+// Export function to create "Memory" model class
 module.exports = mongoose.model("Memory", memorySchema);
